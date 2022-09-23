@@ -591,22 +591,14 @@ var Region = /*#__PURE__*/function () {
     this.preventContextMenu = params.preventContextMenu === undefined ? false : Boolean(params.preventContextMenu); // select channel ID to set region
 
     var channelIdx = params.channelIdx == null ? -1 : parseInt(params.channelIdx);
-    var channelCount = ws.regions.params.channelCount && ws.params.splitChannels ? ws.regions.params.channelCount : -1;
-
-
-    if(channelIdx >= ws.regions.params.channelCount ) {
-      this.regionHeight = '0%';
-      return
-    }
-
     this.channelIdx = channelIdx;
     this.regionHeight = '100%';
     this.marginTop = '0px';
- 
-    if (channelIdx !== -1) {
-    
 
-      if (channelCount >= 0 ) {
+    if (channelIdx !== -1) {
+      var channelCount = this.wavesurfer.backend.buffer != null ? this.wavesurfer.backend.buffer.numberOfChannels : -1;
+
+      if (channelCount >= 0 && channelIdx < channelCount) {
         this.regionHeight = Math.floor(1 / channelCount * 100) + '%';
         this.marginTop = this.wavesurfer.getHeight() * channelIdx + 'px';
       }
@@ -743,7 +735,7 @@ var Region = /*#__PURE__*/function () {
 
       this.style(this.element, {
         position: 'absolute',
-     
+        zIndex: 3,
         height: this.regionHeight,
         top: this.marginTop
       });
