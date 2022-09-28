@@ -301,9 +301,19 @@ export default class RegionsPlugin {
             // set the region channel index based on the clicked area
             if (this.wavesurfer.params.splitChannels) {
                 const y = (e.touches ? e.touches[0].clientY : e.clientY) - wrapperRect.top;
-                const channelCount = this.wavesurfer.backend.buffer != null ? this.wavesurfer.backend.buffer.numberOfChannels : 1;
+                let channelCount = this.wavesurfer.backend.buffer != null ? this.wavesurfer.backend.buffer.numberOfChannels : 1;
+
+                if (params.countChannels) {
+                    channelCount = params.countChannels;
+                }
+
                 const channelHeight = this.wrapper.clientHeight / channelCount;
                 const channelIdx = Math.floor(y / channelHeight);
+
+                if (params.selectableChannelId !== undefined && channelIdx !== params.selectableChannelId) {
+                    return;
+                }
+
                 params.channelIdx = channelIdx;
                 const channelColors = this.wavesurfer.params.splitChannelsOptions.channelColors[channelIdx];
                 if (channelColors && channelColors.dragColor) {
