@@ -1,5 +1,5 @@
 /*!
- * wavesurfer.js mediasession plugin 6.0.4 (2022-03-08)
+ * wavesurfer.js mediasession plugin 6.0.4 (2022-09-28)
  * https://wavesurfer-js.org
  * @license BSD-3-Clause
  */
@@ -12,32 +12,50 @@
 		exports["WaveSurfer"] = factory();
 	else
 		root["WaveSurfer"] = root["WaveSurfer"] || {}, root["WaveSurfer"]["mediasession"] = factory();
-})(self, function() {
+})(self, () => {
 return /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
-/******/ 	var __webpack_modules__ = ({
-
-/***/ "./src/plugin/mediasession/index.js":
+/******/ 	// The require scope
+/******/ 	var __webpack_require__ = {};
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
 /*!******************************************!*\
   !*** ./src/plugin/mediasession/index.js ***!
   \******************************************/
-/***/ ((module, exports) => {
-
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ MediaSessionPlugin)
+/* harmony export */ });
 /*global MediaMetadata*/
 
 /**
@@ -74,12 +92,26 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
  *   ]
  * });
  */
-var MediaSessionPlugin = /*#__PURE__*/function () {
-  function MediaSessionPlugin(params, ws) {
-    var _this = this;
+class MediaSessionPlugin {
+  /**
+   * MediaSession plugin definition factory
+   *
+   * This function must be used to create a plugin definition which can be
+   * used by wavesurfer to correctly instantiate the plugin.
+   *
+   * @param  {MediaSessionPluginParams} params parameters use to initialise the plugin
+   * @return {PluginDefinition} an object representing the plugin
+   */
+  static create(params) {
+    return {
+      name: 'mediasession',
+      deferInit: params && params.deferInit ? params.deferInit : false,
+      params: params,
+      instance: MediaSessionPlugin
+    };
+  }
 
-    _classCallCheck(this, MediaSessionPlugin);
-
+  constructor(params, ws) {
     this.params = params;
     this.wavesurfer = ws;
 
@@ -88,102 +120,37 @@ var MediaSessionPlugin = /*#__PURE__*/function () {
       this.metadata = this.params.metadata;
       this.update(); // update metadata when playback starts
 
-      this.wavesurfer.on('play', function () {
-        _this.update();
+      this.wavesurfer.on('play', () => {
+        this.update();
       }); // set playback action handlers
 
-      navigator.mediaSession.setActionHandler('play', function () {
-        _this.wavesurfer.play();
+      navigator.mediaSession.setActionHandler('play', () => {
+        this.wavesurfer.play();
       });
-      navigator.mediaSession.setActionHandler('pause', function () {
-        _this.wavesurfer.playPause();
+      navigator.mediaSession.setActionHandler('pause', () => {
+        this.wavesurfer.playPause();
       });
-      navigator.mediaSession.setActionHandler('seekbackward', function () {
-        _this.wavesurfer.skipBackward();
+      navigator.mediaSession.setActionHandler('seekbackward', () => {
+        this.wavesurfer.skipBackward();
       });
-      navigator.mediaSession.setActionHandler('seekforward', function () {
-        _this.wavesurfer.skipForward();
+      navigator.mediaSession.setActionHandler('seekforward', () => {
+        this.wavesurfer.skipForward();
       });
     }
   }
 
-  _createClass(MediaSessionPlugin, [{
-    key: "init",
-    value: function init() {}
-  }, {
-    key: "destroy",
-    value: function destroy() {}
-  }, {
-    key: "update",
-    value: function update() {
-      if ((typeof MediaMetadata === "undefined" ? "undefined" : _typeof(MediaMetadata)) === (typeof Function === "undefined" ? "undefined" : _typeof(Function))) {
-        // set metadata
-        navigator.mediaSession.metadata = new MediaMetadata(this.metadata);
-      }
+  init() {}
+
+  destroy() {}
+
+  update() {
+    if (typeof MediaMetadata === typeof Function) {
+      // set metadata
+      navigator.mediaSession.metadata = new MediaMetadata(this.metadata);
     }
-  }], [{
-    key: "create",
-    value:
-    /**
-     * MediaSession plugin definition factory
-     *
-     * This function must be used to create a plugin definition which can be
-     * used by wavesurfer to correctly instantiate the plugin.
-     *
-     * @param  {MediaSessionPluginParams} params parameters use to initialise the plugin
-     * @return {PluginDefinition} an object representing the plugin
-     */
-    function create(params) {
-      return {
-        name: 'mediasession',
-        deferInit: params && params.deferInit ? params.deferInit : false,
-        params: params,
-        instance: MediaSessionPlugin
-      };
-    }
-  }]);
+  }
 
-  return MediaSessionPlugin;
-}();
-
-exports["default"] = MediaSessionPlugin;
-module.exports = exports.default;
-
-/***/ })
-
-/******/ 	});
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __webpack_require__("./src/plugin/mediasession/index.js");
-/******/ 	
+}
 /******/ 	return __webpack_exports__;
 /******/ })()
 ;

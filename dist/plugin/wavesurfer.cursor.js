@@ -1,5 +1,5 @@
 /*!
- * wavesurfer.js cursor plugin 6.0.4 (2022-03-08)
+ * wavesurfer.js cursor plugin 6.0.4 (2022-09-28)
  * https://wavesurfer-js.org
  * @license BSD-3-Clause
  */
@@ -12,32 +12,50 @@
 		exports["WaveSurfer"] = factory();
 	else
 		root["WaveSurfer"] = root["WaveSurfer"] || {}, root["WaveSurfer"]["cursor"] = factory();
-})(self, function() {
+})(self, () => {
 return /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
-/******/ 	var __webpack_modules__ = ({
-
-/***/ "./src/plugin/cursor/index.js":
+/******/ 	// The require scope
+/******/ 	var __webpack_require__ = {};
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
 /*!************************************!*\
   !*** ./src/plugin/cursor/index.js ***!
   \************************************/
-/***/ ((module, exports) => {
-
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ CursorPlugin)
+/* harmony export */ });
 /**
  * @typedef {Object} CursorPluginParams
  * @property {?boolean} deferInit Set to true to stop auto init in `addPlugin()`
@@ -84,7 +102,72 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
  *   ]
  * });
  */
-var CursorPlugin = /*#__PURE__*/function () {
+class CursorPlugin {
+  /**
+   * Cursor plugin definition factory
+   *
+   * This function must be used to create a plugin definition which can be
+   * used by wavesurfer to correctly instantiate the plugin.
+   *
+   * @param  {CursorPluginParams} params parameters use to initialise the
+   * plugin
+   * @return {PluginDefinition} an object representing the plugin
+   */
+  static create(params) {
+    return {
+      name: 'cursor',
+      deferInit: params && params.deferInit ? params.deferInit : false,
+      params: params,
+      staticProps: {},
+      instance: CursorPlugin
+    };
+  }
+  /**
+   * @type {CursorPluginParams}
+   */
+
+
+  defaultParams = {
+    hideOnBlur: true,
+    width: '1px',
+    color: 'black',
+    opacity: '0.25',
+    style: 'solid',
+    zIndex: 4,
+    customStyle: {},
+    customShowTimeStyle: {},
+    showTime: false,
+    followCursorY: false,
+    formatTimeCallback: null
+  };
+  /**
+   * @param {object} e Mouse move event
+   */
+
+  _onMousemove = e => {
+    const event = this.util.withOrientation(e, this.wavesurfer.params.vertical);
+    const bbox = this.wrapper.getBoundingClientRect();
+    let y = 0;
+    let x = this.wrapper.scrollLeft + event.clientX - bbox.left;
+    let flip = bbox.right < event.clientX + this.displayTime.getBoundingClientRect().width;
+
+    if (this.params.showTime && this.params.followCursorY) {
+      // follow y-position of the mouse
+      y = event.clientY - (bbox.top + bbox.height / 2);
+    }
+
+    this.updateCursorPosition(x, y, flip);
+  };
+  /**
+   * @returns {void}
+   */
+
+  _onMouseenter = () => this.showCursor();
+  /**
+   * @returns {void}
+   */
+
+  _onMouseleave = () => this.hideCursor();
   /**
    * Construct the plugin class. You probably want to use `CursorPlugin.create`
    * instead.
@@ -92,51 +175,8 @@ var CursorPlugin = /*#__PURE__*/function () {
    * @param {CursorPluginParams} params Plugin parameters
    * @param {object} ws Wavesurfer instance
    */
-  function CursorPlugin(params, ws) {
-    var _this = this;
 
-    _classCallCheck(this, CursorPlugin);
-
-    _defineProperty(this, "defaultParams", {
-      hideOnBlur: true,
-      width: '1px',
-      color: 'black',
-      opacity: '0.25',
-      style: 'solid',
-      zIndex: 4,
-      customStyle: {},
-      customShowTimeStyle: {},
-      showTime: false,
-      followCursorY: false,
-      formatTimeCallback: null
-    });
-
-    _defineProperty(this, "_onMousemove", function (e) {
-      var event = _this.util.withOrientation(e, _this.wavesurfer.params.vertical);
-
-      var bbox = _this.wrapper.getBoundingClientRect();
-
-      var y = 0;
-      var x = _this.wrapper.scrollLeft + event.clientX - bbox.left;
-
-      var flip = bbox.right < event.clientX + _this.displayTime.getBoundingClientRect().width;
-
-      if (_this.params.showTime && _this.params.followCursorY) {
-        // follow y-position of the mouse
-        y = event.clientY - (bbox.top + bbox.height / 2);
-      }
-
-      _this.updateCursorPosition(x, y, flip);
-    });
-
-    _defineProperty(this, "_onMouseenter", function () {
-      return _this.showCursor();
-    });
-
-    _defineProperty(this, "_onMouseleave", function () {
-      return _this.hideCursor();
-    });
-
+  constructor(params, ws) {
     this.wavesurfer = ws;
     this.style = ws.util.style;
     this.util = ws.util;
@@ -164,262 +204,180 @@ var CursorPlugin = /*#__PURE__*/function () {
     this.params = Object.assign({}, this.defaultParams, params);
   }
 
-  _createClass(CursorPlugin, [{
-    key: "_onReady",
-    value: function _onReady() {
-      this.wrapper = this.wavesurfer.drawer.wrapper;
-      this.cursor = this.util.withOrientation(this.wrapper.appendChild(document.createElement('cursor')), this.wavesurfer.params.vertical);
-      this.style(this.cursor, Object.assign({
+  _onReady() {
+    this.wrapper = this.wavesurfer.drawer.wrapper;
+    this.cursor = this.util.withOrientation(this.wrapper.appendChild(document.createElement('cursor')), this.wavesurfer.params.vertical);
+    this.style(this.cursor, Object.assign({
+      position: 'absolute',
+      zIndex: this.params.zIndex,
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: '0',
+      display: 'flex',
+      borderRightStyle: this.params.style,
+      borderRightWidth: this.params.width,
+      borderRightColor: this.params.color,
+      opacity: this.params.opacity,
+      pointerEvents: 'none'
+    }, this.params.customStyle));
+
+    if (this.params.showTime) {
+      this.showTime = this.util.withOrientation(this.wrapper.appendChild(document.createElement('showTitle')), this.wavesurfer.params.vertical);
+      this.style(this.showTime, Object.assign({
         position: 'absolute',
         zIndex: this.params.zIndex,
         left: 0,
         top: 0,
         bottom: 0,
-        width: '0',
+        width: 'auto',
         display: 'flex',
-        borderRightStyle: this.params.style,
-        borderRightWidth: this.params.width,
-        borderRightColor: this.params.color,
         opacity: this.params.opacity,
-        pointerEvents: 'none'
+        pointerEvents: 'none',
+        height: '100%'
       }, this.params.customStyle));
+      this.displayTime = this.util.withOrientation(this.showTime.appendChild(document.createElement('div')), this.wavesurfer.params.vertical);
+      this.style(this.displayTime, Object.assign({
+        display: 'inline',
+        pointerEvents: 'none',
+        margin: 'auto',
+        visibility: 'hidden' // initial value will be hidden just for measuring purpose
 
-      if (this.params.showTime) {
-        this.showTime = this.util.withOrientation(this.wrapper.appendChild(document.createElement('showTitle')), this.wavesurfer.params.vertical);
-        this.style(this.showTime, Object.assign({
-          position: 'absolute',
-          zIndex: this.params.zIndex,
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: 'auto',
-          display: 'flex',
-          opacity: this.params.opacity,
-          pointerEvents: 'none',
-          height: '100%'
-        }, this.params.customStyle));
-        this.displayTime = this.util.withOrientation(this.showTime.appendChild(document.createElement('div')), this.wavesurfer.params.vertical);
-        this.style(this.displayTime, Object.assign({
-          display: 'inline',
-          pointerEvents: 'none',
-          margin: 'auto',
-          visibility: 'hidden' // initial value will be hidden just for measuring purpose
+      }, this.params.customShowTimeStyle)); // initial value to measure display width
 
-        }, this.params.customShowTimeStyle)); // initial value to measure display width
-
-        this.displayTime.innerHTML = this.formatTime(0);
-      }
-
-      this.wrapper.addEventListener('mousemove', this._onMousemove);
-
-      if (this.params.hideOnBlur) {
-        // ensure elements are hidden initially
-        this.hideCursor();
-        this.wrapper.addEventListener('mouseenter', this._onMouseenter);
-        this.wrapper.addEventListener('mouseleave', this._onMouseleave);
-      }
+      this.displayTime.innerHTML = this.formatTime(0);
     }
-    /**
-     * Initialise the plugin (used by the Plugin API)
-     */
 
-  }, {
-    key: "init",
-    value: function init() {
-      var _this2 = this;
+    this.wrapper.addEventListener('mousemove', this._onMousemove);
 
-      if (this.wavesurfer.isReady) {
-        this._onReady();
-      } else {
-        this.wavesurfer.once('ready', function () {
-          return _this2._onReady();
-        });
-      }
+    if (this.params.hideOnBlur) {
+      // ensure elements are hidden initially
+      this.hideCursor();
+      this.wrapper.addEventListener('mouseenter', this._onMouseenter);
+      this.wrapper.addEventListener('mouseleave', this._onMouseleave);
     }
-    /**
-     * Destroy the plugin (used by the Plugin API)
-     */
+  }
+  /**
+   * Initialise the plugin (used by the Plugin API)
+   */
 
-  }, {
-    key: "destroy",
-    value: function destroy() {
-      if (this.params.showTime) {
-        this.showTime.remove();
-      }
 
-      this.cursor.remove();
-      this.wrapper.removeEventListener('mousemove', this._onMousemove);
-
-      if (this.params.hideOnBlur) {
-        this.wrapper.removeEventListener('mouseenter', this._onMouseenter);
-        this.wrapper.removeEventListener('mouseleave', this._onMouseleave);
-      }
+  init() {
+    if (this.wavesurfer.isReady) {
+      this._onReady();
+    } else {
+      this.wavesurfer.once('ready', () => this._onReady());
     }
-    /**
-     * Update the cursor position
-     *
-     * @param {number} xpos The x offset of the cursor in pixels
-     * @param {number} ypos The y offset of the cursor in pixels
-     * @param {boolean} flip Flag to flip duration text from right to left
-     */
+  }
+  /**
+   * Destroy the plugin (used by the Plugin API)
+   */
 
-  }, {
-    key: "updateCursorPosition",
-    value: function updateCursorPosition(xpos, ypos) {
-      var flip = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-      this.style(this.cursor, {
-        left: "".concat(xpos, "px")
+
+  destroy() {
+    if (this.params.showTime) {
+      this.showTime.remove();
+    }
+
+    this.cursor.remove();
+    this.wrapper.removeEventListener('mousemove', this._onMousemove);
+
+    if (this.params.hideOnBlur) {
+      this.wrapper.removeEventListener('mouseenter', this._onMouseenter);
+      this.wrapper.removeEventListener('mouseleave', this._onMouseleave);
+    }
+  }
+  /**
+   * Update the cursor position
+   *
+   * @param {number} xpos The x offset of the cursor in pixels
+   * @param {number} ypos The y offset of the cursor in pixels
+   * @param {boolean} flip Flag to flip duration text from right to left
+   */
+
+
+  updateCursorPosition(xpos, ypos, flip = false) {
+    this.style(this.cursor, {
+      left: `${xpos}px`
+    });
+
+    if (this.params.showTime) {
+      const duration = this.wavesurfer.getDuration();
+      const elementWidth = this.wavesurfer.drawer.width / this.wavesurfer.params.pixelRatio;
+      const scrollWidth = this.wavesurfer.drawer.getScrollX();
+      const scrollTime = duration / this.wavesurfer.drawer.width * scrollWidth;
+      const timeValue = Math.max(0, (xpos - this.wrapper.scrollLeft) / elementWidth * duration) + scrollTime;
+      const formatValue = this.formatTime(timeValue);
+
+      if (flip) {
+        const textOffset = this.displayTime.getBoundingClientRect().width;
+        xpos -= textOffset;
+      }
+
+      this.style(this.showTime, {
+        left: `${xpos}px`,
+        top: `${ypos}px`
       });
-
-      if (this.params.showTime) {
-        var duration = this.wavesurfer.getDuration();
-        var elementWidth = this.wavesurfer.drawer.width / this.wavesurfer.params.pixelRatio;
-        var scrollWidth = this.wavesurfer.drawer.getScrollX();
-        var scrollTime = duration / this.wavesurfer.drawer.width * scrollWidth;
-        var timeValue = Math.max(0, (xpos - this.wrapper.scrollLeft) / elementWidth * duration) + scrollTime;
-        var formatValue = this.formatTime(timeValue);
-
-        if (flip) {
-          var textOffset = this.displayTime.getBoundingClientRect().width;
-          xpos -= textOffset;
-        }
-
-        this.style(this.showTime, {
-          left: "".concat(xpos, "px"),
-          top: "".concat(ypos, "px")
-        });
-        this.style(this.displayTime, {
-          visibility: 'visible'
-        });
-        this.displayTime.innerHTML = "".concat(formatValue);
-      }
+      this.style(this.displayTime, {
+        visibility: 'visible'
+      });
+      this.displayTime.innerHTML = `${formatValue}`;
     }
-    /**
-     * Show the cursor
-     */
+  }
+  /**
+   * Show the cursor
+   */
 
-  }, {
-    key: "showCursor",
-    value: function showCursor() {
-      this.style(this.cursor, {
+
+  showCursor() {
+    this.style(this.cursor, {
+      display: 'flex'
+    });
+
+    if (this.params.showTime) {
+      this.style(this.showTime, {
         display: 'flex'
       });
-
-      if (this.params.showTime) {
-        this.style(this.showTime, {
-          display: 'flex'
-        });
-      }
     }
-    /**
-     * Hide the cursor
-     */
+  }
+  /**
+   * Hide the cursor
+   */
 
-  }, {
-    key: "hideCursor",
-    value: function hideCursor() {
-      this.style(this.cursor, {
+
+  hideCursor() {
+    this.style(this.cursor, {
+      display: 'none'
+    });
+
+    if (this.params.showTime) {
+      this.style(this.showTime, {
         display: 'none'
       });
-
-      if (this.params.showTime) {
-        this.style(this.showTime, {
-          display: 'none'
-        });
-      }
     }
-    /**
-     * Format the timestamp for `cursorTime`.
-     *
-     * @param {number} cursorTime Time in seconds
-     * @returns {string} Formatted timestamp
-     */
+  }
+  /**
+   * Format the timestamp for `cursorTime`.
+   *
+   * @param {number} cursorTime Time in seconds
+   * @returns {string} Formatted timestamp
+   */
 
-  }, {
-    key: "formatTime",
-    value: function formatTime(cursorTime) {
-      cursorTime = isNaN(cursorTime) ? 0 : cursorTime;
 
-      if (this.params.formatTimeCallback) {
-        return this.params.formatTimeCallback(cursorTime);
-      }
+  formatTime(cursorTime) {
+    cursorTime = isNaN(cursorTime) ? 0 : cursorTime;
 
-      return [cursorTime].map(function (time) {
-        return [Math.floor(time % 3600 / 60), // minutes
-        ('00' + Math.floor(time % 60)).slice(-2), // seconds
-        ('000' + Math.floor(time % 1 * 1000)).slice(-3) // milliseconds
-        ].join(':');
-      });
+    if (this.params.formatTimeCallback) {
+      return this.params.formatTimeCallback(cursorTime);
     }
-  }], [{
-    key: "create",
-    value:
-    /**
-     * Cursor plugin definition factory
-     *
-     * This function must be used to create a plugin definition which can be
-     * used by wavesurfer to correctly instantiate the plugin.
-     *
-     * @param  {CursorPluginParams} params parameters use to initialise the
-     * plugin
-     * @return {PluginDefinition} an object representing the plugin
-     */
-    function create(params) {
-      return {
-        name: 'cursor',
-        deferInit: params && params.deferInit ? params.deferInit : false,
-        params: params,
-        staticProps: {},
-        instance: CursorPlugin
-      };
-    }
-    /**
-     * @type {CursorPluginParams}
-     */
 
-  }]);
+    return [cursorTime].map(time => [Math.floor(time % 3600 / 60), // minutes
+    ('00' + Math.floor(time % 60)).slice(-2), // seconds
+    ('000' + Math.floor(time % 1 * 1000)).slice(-3) // milliseconds
+    ].join(':'));
+  }
 
-  return CursorPlugin;
-}();
-
-exports["default"] = CursorPlugin;
-module.exports = exports.default;
-
-/***/ })
-
-/******/ 	});
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __webpack_require__("./src/plugin/cursor/index.js");
-/******/ 	
+}
 /******/ 	return __webpack_exports__;
 /******/ })()
 ;

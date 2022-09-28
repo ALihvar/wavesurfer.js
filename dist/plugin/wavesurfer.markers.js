@@ -1,5 +1,5 @@
 /*!
- * wavesurfer.js markers plugin 6.0.4 (2022-03-08)
+ * wavesurfer.js markers plugin 6.0.4 (2022-09-28)
  * https://wavesurfer-js.org
  * @license BSD-3-Clause
  */
@@ -12,30 +12,50 @@
 		exports["WaveSurfer"] = factory();
 	else
 		root["WaveSurfer"] = root["WaveSurfer"] || {}, root["WaveSurfer"]["markers"] = factory();
-})(self, function() {
+})(self, () => {
 return /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
-/******/ 	var __webpack_modules__ = ({
-
-/***/ "./src/plugin/markers/index.js":
+/******/ 	// The require scope
+/******/ 	var __webpack_require__ = {};
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
 /*!*************************************!*\
   !*** ./src/plugin/markers/index.js ***!
   \*************************************/
-/***/ ((module, exports) => {
-
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ MarkersPlugin)
+/* harmony export */ });
 /**
  * @typedef {Object} MarkerParams
  * @desc The parameters used to describe a marker.
@@ -69,15 +89,51 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
  *   ]
  * });
  */
-var DEFAULT_FILL_COLOR = "#D8D8D8";
-var DEFAULT_POSITION = "bottom";
+const DEFAULT_FILL_COLOR = "#D8D8D8";
+const DEFAULT_POSITION = "bottom";
+class MarkersPlugin {
+  /**
+   * @typedef {Object} MarkersPluginParams
+   * @property {?MarkerParams[]} markers Initial set of markers
+   * @fires MarkersPlugin#marker-click
+   * @fires MarkersPlugin#marker-drag
+   * @fires MarkersPlugin#marker-drop
+   */
 
-var MarkersPlugin = /*#__PURE__*/function () {
-  function MarkersPlugin(params, ws) {
-    var _this = this;
+  /**
+   * Markers plugin definition factory
+   *
+   * This function must be used to create a plugin definition which can be
+   * used by wavesurfer to correctly instantiate the plugin.
+   *
+   * @param {MarkersPluginParams} params parameters use to initialise the plugin
+   * @since 4.6.0
+   * @return {PluginDefinition} an object representing the plugin
+   */
+  static create(params) {
+    return {
+      name: 'markers',
+      deferInit: params && params.deferInit ? params.deferInit : false,
+      params: params,
+      staticProps: {
+        addMarker(options) {
+          if (!this.initialisedPluginList.markers) {
+            this.initPlugin('markers');
+          }
 
-    _classCallCheck(this, MarkersPlugin);
+          return this.markers.add(options);
+        },
 
+        clearMarkers() {
+          this.markers && this.markers.clear();
+        }
+
+      },
+      instance: MarkersPlugin
+    };
+  }
+
+  constructor(params, ws) {
     this.params = params;
     this.wavesurfer = ws;
     this.util = ws.util;
@@ -87,409 +143,301 @@ var MarkersPlugin = /*#__PURE__*/function () {
     this.markerHeight = 22;
     this.dragging = false;
 
-    this._onResize = function () {
-      _this._updateMarkerPositions();
+    this._onResize = () => {
+      this._updateMarkerPositions();
     };
 
-    this._onBackendCreated = function () {
-      _this.wrapper = _this.wavesurfer.drawer.wrapper;
+    this._onBackendCreated = () => {
+      this.wrapper = this.wavesurfer.drawer.wrapper;
 
-      if (_this.params.markers) {
-        _this.params.markers.forEach(function (marker) {
-          return _this.add(marker);
-        });
+      if (this.params.markers) {
+        this.params.markers.forEach(marker => this.add(marker));
       }
 
-      window.addEventListener('resize', _this._onResize, true);
-      window.addEventListener('orientationchange', _this._onResize, true);
+      window.addEventListener('resize', this._onResize, true);
+      window.addEventListener('orientationchange', this._onResize, true);
+      this.wavesurfer.on('zoom', this._onResize);
 
-      _this.wavesurfer.on('zoom', _this._onResize);
-
-      if (!_this.markers.find(function (marker) {
-        return marker.draggable;
-      })) {
+      if (!this.markers.find(marker => marker.draggable)) {
         return;
       }
 
-      _this.onMouseMove = function (e) {
-        return _this._onMouseMove(e);
-      };
+      this.onMouseMove = e => this._onMouseMove(e);
 
-      window.addEventListener('mousemove', _this.onMouseMove);
+      window.addEventListener('mousemove', this.onMouseMove);
 
-      _this.onMouseUp = function (e) {
-        return _this._onMouseUp(e);
-      };
+      this.onMouseUp = e => this._onMouseUp(e);
 
-      window.addEventListener("mouseup", _this.onMouseUp);
+      window.addEventListener("mouseup", this.onMouseUp);
     };
 
     this.markers = [];
 
-    this._onReady = function () {
-      _this.wrapper = _this.wavesurfer.drawer.wrapper;
+    this._onReady = () => {
+      this.wrapper = this.wavesurfer.drawer.wrapper;
 
-      _this._updateMarkerPositions();
+      this._updateMarkerPositions();
     };
   }
 
-  _createClass(MarkersPlugin, [{
-    key: "init",
-    value: function init() {
-      // Check if ws is ready
-      if (this.wavesurfer.isReady) {
-        this._onBackendCreated();
+  init() {
+    // Check if ws is ready
+    if (this.wavesurfer.isReady) {
+      this._onBackendCreated();
 
-        this._onReady();
-      } else {
-        this.wavesurfer.once('ready', this._onReady);
-        this.wavesurfer.once('backend-created', this._onBackendCreated);
-      }
+      this._onReady();
+    } else {
+      this.wavesurfer.once('ready', this._onReady);
+      this.wavesurfer.once('backend-created', this._onBackendCreated);
     }
-  }, {
-    key: "destroy",
-    value: function destroy() {
-      this.wavesurfer.un('ready', this._onReady);
-      this.wavesurfer.un('backend-created', this._onBackendCreated);
-      this.wavesurfer.un('zoom', this._onResize);
-      window.removeEventListener('resize', this._onResize, true);
-      window.removeEventListener('orientationchange', this._onResize, true);
+  }
 
-      if (this.onMouseMove) {
-        window.removeEventListener('mousemove', this.onMouseMove);
-      }
+  destroy() {
+    this.wavesurfer.un('ready', this._onReady);
+    this.wavesurfer.un('backend-created', this._onBackendCreated);
+    this.wavesurfer.un('zoom', this._onResize);
+    window.removeEventListener('resize', this._onResize, true);
+    window.removeEventListener('orientationchange', this._onResize, true);
 
-      if (this.onMouseUp) {
-        window.removeEventListener("mouseup", this.onMouseUp);
-      }
-
-      this.clear();
+    if (this.onMouseMove) {
+      window.removeEventListener('mousemove', this.onMouseMove);
     }
-    /**
-     * Add a marker
-     *
-     * @param {MarkerParams} params Marker definition
-     * @return {object} The created marker
-     */
 
-  }, {
-    key: "add",
-    value: function add(params) {
-      var marker = {
-        time: params.time,
-        label: params.label,
-        color: params.color || DEFAULT_FILL_COLOR,
-        position: params.position || DEFAULT_POSITION,
-        draggable: !!params.draggable
-      };
-      marker.el = this._createMarkerElement(marker, params.markerElement);
-      this.wrapper.appendChild(marker.el);
-      this.markers.push(marker);
-
-      this._updateMarkerPositions();
-
-      return marker;
+    if (this.onMouseUp) {
+      window.removeEventListener("mouseup", this.onMouseUp);
     }
-    /**
-     * Remove a marker
-     *
-     * @param {number} index Index of the marker to remove
-     */
 
-  }, {
-    key: "remove",
-    value: function remove(index) {
-      var marker = this.markers[index];
+    this.clear();
+  }
+  /**
+   * Add a marker
+   *
+   * @param {MarkerParams} params Marker definition
+   * @return {object} The created marker
+   */
 
-      if (!marker) {
+
+  add(params) {
+    let marker = {
+      time: params.time,
+      label: params.label,
+      color: params.color || DEFAULT_FILL_COLOR,
+      position: params.position || DEFAULT_POSITION,
+      draggable: !!params.draggable
+    };
+    marker.el = this._createMarkerElement(marker, params.markerElement);
+    this.wrapper.appendChild(marker.el);
+    this.markers.push(marker);
+
+    this._updateMarkerPositions();
+
+    return marker;
+  }
+  /**
+   * Remove a marker
+   *
+   * @param {number} index Index of the marker to remove
+   */
+
+
+  remove(index) {
+    let marker = this.markers[index];
+
+    if (!marker) {
+      return;
+    }
+
+    this.wrapper.removeChild(marker.el);
+    this.markers.splice(index, 1);
+  }
+
+  _createPointerSVG(color, position) {
+    const svgNS = "http://www.w3.org/2000/svg";
+    const el = document.createElementNS(svgNS, "svg");
+    const polygon = document.createElementNS(svgNS, "polygon");
+    el.setAttribute("viewBox", "0 0 40 80");
+    polygon.setAttribute("id", "polygon");
+    polygon.setAttribute("stroke", "#979797");
+    polygon.setAttribute("fill", color);
+    polygon.setAttribute("points", "20 0 40 30 40 80 0 80 0 30");
+
+    if (position == "top") {
+      polygon.setAttribute("transform", "rotate(180, 20 40)");
+    }
+
+    el.appendChild(polygon);
+    this.style(el, {
+      width: this.markerWidth + "px",
+      height: this.markerHeight + "px",
+      "min-width": this.markerWidth + "px",
+      "margin-right": "5px",
+      "z-index": 4
+    });
+    return el;
+  }
+
+  _createMarkerElement(marker, markerElement) {
+    let label = marker.label;
+    const el = document.createElement('marker');
+    el.className = "wavesurfer-marker";
+    this.style(el, {
+      position: "absolute",
+      height: "100%",
+      display: "flex",
+      overflow: "hidden",
+      "flex-direction": marker.position == "top" ? "column-reverse" : "column"
+    });
+    const line = document.createElement('div');
+    const width = markerElement ? markerElement.width : this.markerWidth;
+    marker.offset = (width - this.markerLineWidth) / 2;
+    this.style(line, {
+      "flex-grow": 1,
+      "margin-left": marker.offset + "px",
+      background: "black",
+      width: this.markerLineWidth + "px",
+      opacity: 0.1
+    });
+    el.appendChild(line);
+    const labelDiv = document.createElement('div');
+
+    const point = markerElement || this._createPointerSVG(marker.color, marker.position);
+
+    if (marker.draggable) {
+      point.draggable = false;
+    }
+
+    labelDiv.appendChild(point);
+
+    if (label) {
+      const labelEl = document.createElement('span');
+      labelEl.innerText = label;
+      this.style(labelEl, {
+        "font-family": "monospace",
+        "font-size": "90%"
+      });
+      labelDiv.appendChild(labelEl);
+    }
+
+    this.style(labelDiv, {
+      display: "flex",
+      "align-items": "center",
+      cursor: "pointer"
+    });
+    el.appendChild(labelDiv);
+    labelDiv.addEventListener("click", e => {
+      e.stopPropagation(); // Click event is caught when the marker-drop event was dispatched.
+      // Drop event was dispatched at this moment, but this.dragging
+      // is waiting for the next tick to set as false
+
+      if (this.dragging) {
         return;
       }
 
-      this.wrapper.removeChild(marker.el);
-      this.markers.splice(index, 1);
-    }
-  }, {
-    key: "_createPointerSVG",
-    value: function _createPointerSVG(color, position) {
-      var svgNS = "http://www.w3.org/2000/svg";
-      var el = document.createElementNS(svgNS, "svg");
-      var polygon = document.createElementNS(svgNS, "polygon");
-      el.setAttribute("viewBox", "0 0 40 80");
-      polygon.setAttribute("id", "polygon");
-      polygon.setAttribute("stroke", "#979797");
-      polygon.setAttribute("fill", color);
-      polygon.setAttribute("points", "20 0 40 30 40 80 0 80 0 30");
+      this.wavesurfer.setCurrentTime(marker.time);
+      this.wavesurfer.fireEvent("marker-click", marker, e);
+    });
 
-      if (position == "top") {
-        polygon.setAttribute("transform", "rotate(180, 20 40)");
-      }
-
-      el.appendChild(polygon);
-      this.style(el, {
-        width: this.markerWidth + "px",
-        height: this.markerHeight + "px",
-        "min-width": this.markerWidth + "px",
-        "margin-right": "5px",
-        "z-index": 4
-      });
-      return el;
-    }
-  }, {
-    key: "_createMarkerElement",
-    value: function _createMarkerElement(marker, markerElement) {
-      var _this2 = this;
-
-      var label = marker.label;
-      var el = document.createElement('marker');
-      el.className = "wavesurfer-marker";
-      this.style(el, {
-        position: "absolute",
-        height: "100%",
-        display: "flex",
-        overflow: "hidden",
-        "flex-direction": marker.position == "top" ? "column-reverse" : "column"
-      });
-      var line = document.createElement('div');
-      var width = markerElement ? markerElement.width : this.markerWidth;
-      marker.offset = (width - this.markerLineWidth) / 2;
-      this.style(line, {
-        "flex-grow": 1,
-        "margin-left": marker.offset + "px",
-        background: "black",
-        width: this.markerLineWidth + "px",
-        opacity: 0.1
-      });
-      el.appendChild(line);
-      var labelDiv = document.createElement('div');
-
-      var point = markerElement || this._createPointerSVG(marker.color, marker.position);
-
-      if (marker.draggable) {
-        point.draggable = false;
-      }
-
-      labelDiv.appendChild(point);
-
-      if (label) {
-        var labelEl = document.createElement('span');
-        labelEl.innerText = label;
-        this.style(labelEl, {
-          "font-family": "monospace",
-          "font-size": "90%"
-        });
-        labelDiv.appendChild(labelEl);
-      }
-
-      this.style(labelDiv, {
-        display: "flex",
-        "align-items": "center",
-        cursor: "pointer"
-      });
-      el.appendChild(labelDiv);
-      labelDiv.addEventListener("click", function (e) {
-        e.stopPropagation(); // Click event is caught when the marker-drop event was dispatched.
-        // Drop event was dispatched at this moment, but this.dragging
-        // is waiting for the next tick to set as false
-
-        if (_this2.dragging) {
-          return;
-        }
-
-        _this2.wavesurfer.setCurrentTime(marker.time);
-
-        _this2.wavesurfer.fireEvent("marker-click", marker, e);
-      });
-
-      if (marker.draggable) {
-        labelDiv.addEventListener("mousedown", function (e) {
-          _this2.selectedMarker = marker;
-        });
-      }
-
-      return el;
-    }
-  }, {
-    key: "_updateMarkerPositions",
-    value: function _updateMarkerPositions() {
-      for (var i = 0; i < this.markers.length; i++) {
-        var marker = this.markers[i];
-
-        this._updateMarkerPosition(marker);
-      }
-    }
-    /**
-     * Update a marker position based on its time property.
-     *
-     * @private
-     * @param {MarkerParams} params The marker to update.
-     * @returns {void}
-     */
-
-  }, {
-    key: "_updateMarkerPosition",
-    value: function _updateMarkerPosition(params) {
-      var duration = this.wavesurfer.getDuration();
-      var elementWidth = this.wavesurfer.drawer.width / this.wavesurfer.params.pixelRatio;
-      var positionPct = Math.min(params.time / duration, 1);
-      var leftPx = elementWidth * positionPct - params.offset;
-      this.style(params.el, {
-        "left": leftPx + "px",
-        "max-width": elementWidth - leftPx + "px"
+    if (marker.draggable) {
+      labelDiv.addEventListener("mousedown", e => {
+        this.selectedMarker = marker;
       });
     }
-    /**
-     * Fires `marker-drag` event, update the `time` property for the
-     * selected marker based on the mouse position, and calls to update
-     * its position.
-     *
-     * @private
-     * @param {MouseEvent} event The mouse event.
-     * @returns {void}
-     */
 
-  }, {
-    key: "_onMouseMove",
-    value: function _onMouseMove(event) {
-      if (!this.selectedMarker) {
-        return;
-      }
+    return el;
+  }
 
-      if (!this.dragging) {
-        this.dragging = true;
-        this.wavesurfer.fireEvent("marker-drag", this.selectedMarker, event);
-      }
+  _updateMarkerPositions() {
+    for (let i = 0; i < this.markers.length; i++) {
+      let marker = this.markers[i];
 
-      this.selectedMarker.time = this.wavesurfer.drawer.handleEvent(event) * this.wavesurfer.getDuration();
-
-      this._updateMarkerPositions();
+      this._updateMarkerPosition(marker);
     }
-    /**
-     * Fires `marker-drop` event and unselect the dragged marker.
-     *
-     * @private
-     * @param {MouseEvent} event The mouse event.
-     * @returns {void}
-     */
+  }
+  /**
+   * Update a marker position based on its time property.
+   *
+   * @private
+   * @param {MarkerParams} params The marker to update.
+   * @returns {void}
+   */
 
-  }, {
-    key: "_onMouseUp",
-    value: function _onMouseUp(event) {
-      var _this3 = this;
 
-      if (this.selectedMarker) {
-        setTimeout(function () {
-          _this3.selectedMarker = false;
-          _this3.dragging = false;
-        }, 0);
-      }
+  _updateMarkerPosition(params) {
+    const duration = this.wavesurfer.getDuration();
+    const elementWidth = this.wavesurfer.drawer.width / this.wavesurfer.params.pixelRatio;
+    const positionPct = Math.min(params.time / duration, 1);
+    const leftPx = elementWidth * positionPct - params.offset;
+    this.style(params.el, {
+      "left": leftPx + "px",
+      "max-width": elementWidth - leftPx + "px"
+    });
+  }
+  /**
+   * Fires `marker-drag` event, update the `time` property for the
+   * selected marker based on the mouse position, and calls to update
+   * its position.
+   *
+   * @private
+   * @param {MouseEvent} event The mouse event.
+   * @returns {void}
+   */
 
-      if (!this.dragging) {
-        return;
-      }
 
-      event.stopPropagation();
-      var duration = this.wavesurfer.getDuration();
-      this.selectedMarker.time = this.wavesurfer.drawer.handleEvent(event) * duration;
-
-      this._updateMarkerPositions();
-
-      this.wavesurfer.fireEvent("marker-drop", this.selectedMarker, event);
+  _onMouseMove(event) {
+    if (!this.selectedMarker) {
+      return;
     }
-    /**
-     * Remove all markers
-     */
 
-  }, {
-    key: "clear",
-    value: function clear() {
-      while (this.markers.length > 0) {
-        this.remove(0);
-      }
+    if (!this.dragging) {
+      this.dragging = true;
+      this.wavesurfer.fireEvent("marker-drag", this.selectedMarker, event);
     }
-  }], [{
-    key: "create",
-    value:
-    /**
-     * @typedef {Object} MarkersPluginParams
-     * @property {?MarkerParams[]} markers Initial set of markers
-     * @fires MarkersPlugin#marker-click
-     * @fires MarkersPlugin#marker-drag
-     * @fires MarkersPlugin#marker-drop
-     */
 
-    /**
-     * Markers plugin definition factory
-     *
-     * This function must be used to create a plugin definition which can be
-     * used by wavesurfer to correctly instantiate the plugin.
-     *
-     * @param {MarkersPluginParams} params parameters use to initialise the plugin
-     * @since 4.6.0
-     * @return {PluginDefinition} an object representing the plugin
-     */
-    function create(params) {
-      return {
-        name: 'markers',
-        deferInit: params && params.deferInit ? params.deferInit : false,
-        params: params,
-        staticProps: {
-          addMarker: function addMarker(options) {
-            if (!this.initialisedPluginList.markers) {
-              this.initPlugin('markers');
-            }
+    this.selectedMarker.time = this.wavesurfer.drawer.handleEvent(event) * this.wavesurfer.getDuration();
 
-            return this.markers.add(options);
-          },
-          clearMarkers: function clearMarkers() {
-            this.markers && this.markers.clear();
-          }
-        },
-        instance: MarkersPlugin
-      };
+    this._updateMarkerPositions();
+  }
+  /**
+   * Fires `marker-drop` event and unselect the dragged marker.
+   *
+   * @private
+   * @param {MouseEvent} event The mouse event.
+   * @returns {void}
+   */
+
+
+  _onMouseUp(event) {
+    if (this.selectedMarker) {
+      setTimeout(() => {
+        this.selectedMarker = false;
+        this.dragging = false;
+      }, 0);
     }
-  }]);
 
-  return MarkersPlugin;
-}();
+    if (!this.dragging) {
+      return;
+    }
 
-exports["default"] = MarkersPlugin;
-module.exports = exports.default;
+    event.stopPropagation();
+    const duration = this.wavesurfer.getDuration();
+    this.selectedMarker.time = this.wavesurfer.drawer.handleEvent(event) * duration;
 
-/***/ })
+    this._updateMarkerPositions();
 
-/******/ 	});
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __webpack_require__("./src/plugin/markers/index.js");
-/******/ 	
+    this.wavesurfer.fireEvent("marker-drop", this.selectedMarker, event);
+  }
+  /**
+   * Remove all markers
+   */
+
+
+  clear() {
+    while (this.markers.length > 0) {
+      this.remove(0);
+    }
+  }
+
+}
 /******/ 	return __webpack_exports__;
 /******/ })()
 ;

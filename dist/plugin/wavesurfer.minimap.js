@@ -1,5 +1,5 @@
 /*!
- * wavesurfer.js minimap plugin 6.0.4 (2022-03-08)
+ * wavesurfer.js minimap plugin 6.0.4 (2022-09-28)
  * https://wavesurfer-js.org
  * @license BSD-3-Clause
  */
@@ -12,30 +12,50 @@
 		exports["WaveSurfer"] = factory();
 	else
 		root["WaveSurfer"] = root["WaveSurfer"] || {}, root["WaveSurfer"]["minimap"] = factory();
-})(self, function() {
+})(self, () => {
 return /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
-/******/ 	var __webpack_modules__ = ({
-
-/***/ "./src/plugin/minimap/index.js":
+/******/ 	// The require scope
+/******/ 	var __webpack_require__ = {};
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
 /*!*************************************!*\
   !*** ./src/plugin/minimap/index.js ***!
   \*************************************/
-/***/ ((module, exports) => {
-
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ MinimapPlugin)
+/* harmony export */ });
 /*eslint no-console: ["error", { allow: ["warn"] }] */
 
 /**
@@ -73,12 +93,27 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
  *   ]
  * });
  */
-var MinimapPlugin = /*#__PURE__*/function () {
-  function MinimapPlugin(params, ws) {
-    var _this = this;
+class MinimapPlugin {
+  /**
+   * Minimap plugin definition factory
+   *
+   * This function must be used to create a plugin definition which can be
+   * used by wavesurfer to correctly instantiate the plugin.
+   *
+   * @param  {MinimapPluginParams} params parameters use to initialise the plugin
+   * @return {PluginDefinition} an object representing the plugin
+   */
+  static create(params) {
+    return {
+      name: 'minimap',
+      deferInit: params && params.deferInit ? params.deferInit : false,
+      params: params,
+      staticProps: {},
+      instance: MinimapPlugin
+    };
+  }
 
-    _classCallCheck(this, MinimapPlugin);
-
+  constructor(params, ws) {
     this.params = Object.assign({}, ws.params, {
       showRegions: false,
       regionsPluginName: params.regionsPluginName || 'regions',
@@ -94,10 +129,10 @@ var MinimapPlugin = /*#__PURE__*/function () {
     }); // if container is a selector, get the element
 
     if (typeof params.container === 'string') {
-      var el = document.querySelector(params.container);
+      const el = document.querySelector(params.container);
 
       if (!el) {
-        console.warn("Wavesurfer minimap container ".concat(params.container, " was not found! The minimap will be automatically appended below the waveform."));
+        console.warn(`Wavesurfer minimap container ${params.container} was not found! The minimap will be automatically appended below the waveform.`);
       }
 
       this.params.container = el;
@@ -118,350 +153,256 @@ var MinimapPlugin = /*#__PURE__*/function () {
     this.regionsPlugin = this.wavesurfer[this.params.regionsPluginName];
     this.drawer.createWrapper();
     this.createElements();
-    var isInitialised = false; // ws ready event listener
+    let isInitialised = false; // ws ready event listener
 
-    this._onShouldRender = function () {
+    this._onShouldRender = () => {
       // only bind the events in the first run
       if (!isInitialised) {
-        _this.bindWavesurferEvents();
-
-        _this.bindMinimapEvents();
-
+        this.bindWavesurferEvents();
+        this.bindMinimapEvents();
         isInitialised = true;
       } // if there is no such element, append it to the container (below
       // the waveform)
 
 
-      if (!document.body.contains(_this.params.container)) {
-        ws.container.insertBefore(_this.params.container, null);
+      if (!document.body.contains(this.params.container)) {
+        ws.container.insertBefore(this.params.container, null);
       }
 
-      if (_this.regionsPlugin && _this.params.showRegions) {
-        _this.regions();
+      if (this.regionsPlugin && this.params.showRegions) {
+        this.regions();
       }
 
-      _this.render();
+      this.render();
     };
 
-    this._onAudioprocess = function (currentTime) {
-      _this.drawer.progress(_this.wavesurfer.backend.getPlayedPercents());
+    this._onAudioprocess = currentTime => {
+      this.drawer.progress(this.wavesurfer.backend.getPlayedPercents());
     }; // ws seek event listener
 
 
-    this._onSeek = function () {
-      return _this.drawer.progress(ws.backend.getPlayedPercents());
-    }; // event listeners for the overview region
+    this._onSeek = () => this.drawer.progress(ws.backend.getPlayedPercents()); // event listeners for the overview region
 
 
-    this._onScroll = function (e) {
-      if (!_this.draggingOverview) {
-        var orientedTarget = _this.util.withOrientation(e.target, _this.wavesurfer.params.vertical);
-
-        _this.moveOverviewRegion(orientedTarget.scrollLeft / _this.ratio);
+    this._onScroll = e => {
+      if (!this.draggingOverview) {
+        const orientedTarget = this.util.withOrientation(e.target, this.wavesurfer.params.vertical);
+        this.moveOverviewRegion(orientedTarget.scrollLeft / this.ratio);
       }
     };
 
-    this._onMouseover = function (e) {
-      if (_this.draggingOverview) {
-        _this.draggingOverview = false;
+    this._onMouseover = e => {
+      if (this.draggingOverview) {
+        this.draggingOverview = false;
       }
     };
 
-    var prevWidth = 0;
-    this._onResize = ws.util.debounce(function () {
-      if (prevWidth != _this.drawer.wrapper.clientWidth) {
-        prevWidth = _this.drawer.wrapper.clientWidth;
-
-        _this.render();
-
-        _this.drawer.progress(_this.wavesurfer.backend.getPlayedPercents());
+    let prevWidth = 0;
+    this._onResize = ws.util.debounce(() => {
+      if (prevWidth != this.drawer.wrapper.clientWidth) {
+        prevWidth = this.drawer.wrapper.clientWidth;
+        this.render();
+        this.drawer.progress(this.wavesurfer.backend.getPlayedPercents());
       }
     });
 
-    this._onZoom = function (e) {
-      _this.render();
+    this._onZoom = e => {
+      this.render();
     };
 
     this.wavesurfer.on('zoom', this._onZoom);
   }
 
-  _createClass(MinimapPlugin, [{
-    key: "init",
-    value: function init() {
-      if (this.wavesurfer.isReady) {
-        this._onShouldRender();
-      }
-
-      this.wavesurfer.on(this.renderEvent, this._onShouldRender);
+  init() {
+    if (this.wavesurfer.isReady) {
+      this._onShouldRender();
     }
-  }, {
-    key: "destroy",
-    value: function destroy() {
-      window.removeEventListener('resize', this._onResize, true);
-      window.removeEventListener('orientationchange', this._onResize, true);
-      this.wavesurfer.drawer.wrapper.removeEventListener('mouseover', this._onMouseover);
-      this.wavesurfer.un(this.renderEvent, this._onShouldRender);
-      this.wavesurfer.un('seek', this._onSeek);
-      this.wavesurfer.un('scroll', this._onScroll);
-      this.wavesurfer.un('audioprocess', this._onAudioprocess);
-      this.wavesurfer.un('zoom', this._onZoom);
-      this.drawer.destroy();
-      this.overviewRegion = null;
-      this.unAll();
-    }
-  }, {
-    key: "regions",
-    value: function regions() {
-      var _this2 = this;
 
-      this.regions = {};
-      this.wavesurfer.on('region-created', function (region) {
-        _this2.regions[region.id] = region;
-        _this2.drawer.wrapper && _this2.renderRegions();
+    this.wavesurfer.on(this.renderEvent, this._onShouldRender);
+  }
+
+  destroy() {
+    window.removeEventListener('resize', this._onResize, true);
+    window.removeEventListener('orientationchange', this._onResize, true);
+    this.wavesurfer.drawer.wrapper.removeEventListener('mouseover', this._onMouseover);
+    this.wavesurfer.un(this.renderEvent, this._onShouldRender);
+    this.wavesurfer.un('seek', this._onSeek);
+    this.wavesurfer.un('scroll', this._onScroll);
+    this.wavesurfer.un('audioprocess', this._onAudioprocess);
+    this.wavesurfer.un('zoom', this._onZoom);
+    this.drawer.destroy();
+    this.overviewRegion = null;
+    this.unAll();
+  }
+
+  regions() {
+    this.regions = {};
+    this.wavesurfer.on('region-created', region => {
+      this.regions[region.id] = region;
+      this.drawer.wrapper && this.renderRegions();
+    });
+    this.wavesurfer.on('region-updated', region => {
+      this.regions[region.id] = region;
+      this.drawer.wrapper && this.renderRegions();
+    });
+    this.wavesurfer.on('region-removed', region => {
+      delete this.regions[region.id];
+      this.drawer.wrapper && this.renderRegions();
+    });
+  }
+
+  renderRegions() {
+    const regionElements = this.drawer.wrapper.querySelectorAll('region');
+    let i;
+
+    for (i = 0; i < regionElements.length; ++i) {
+      this.drawer.wrapper.removeChild(regionElements[i]);
+    }
+
+    Object.keys(this.regions).forEach(id => {
+      const region = this.regions[id];
+      const width = this.getWidth() * ((region.end - region.start) / this.wavesurfer.getDuration());
+      const left = this.getWidth() * (region.start / this.wavesurfer.getDuration());
+      const regionElement = this.util.style(document.createElement('region'), {
+        height: 'inherit',
+        backgroundColor: region.color,
+        width: width + 'px',
+        left: left + 'px',
+        display: 'block',
+        position: 'absolute'
       });
-      this.wavesurfer.on('region-updated', function (region) {
-        _this2.regions[region.id] = region;
-        _this2.drawer.wrapper && _this2.renderRegions();
-      });
-      this.wavesurfer.on('region-removed', function (region) {
-        delete _this2.regions[region.id];
-        _this2.drawer.wrapper && _this2.renderRegions();
-      });
-    }
-  }, {
-    key: "renderRegions",
-    value: function renderRegions() {
-      var _this3 = this;
+      regionElement.classList.add(id);
+      this.drawer.wrapper.appendChild(regionElement);
+    });
+  }
 
-      var regionElements = this.drawer.wrapper.querySelectorAll('region');
-      var i;
+  createElements() {
+    this.drawer.createElements();
 
-      for (i = 0; i < regionElements.length; ++i) {
-        this.drawer.wrapper.removeChild(regionElements[i]);
-      }
-
-      Object.keys(this.regions).forEach(function (id) {
-        var region = _this3.regions[id];
-
-        var width = _this3.getWidth() * ((region.end - region.start) / _this3.wavesurfer.getDuration());
-
-        var left = _this3.getWidth() * (region.start / _this3.wavesurfer.getDuration());
-
-        var regionElement = _this3.util.style(document.createElement('region'), {
-          height: 'inherit',
-          backgroundColor: region.color,
-          width: width + 'px',
-          left: left + 'px',
-          display: 'block',
-          position: 'absolute'
-        });
-
-        regionElement.classList.add(id);
-
-        _this3.drawer.wrapper.appendChild(regionElement);
-      });
-    }
-  }, {
-    key: "createElements",
-    value: function createElements() {
-      this.drawer.createElements();
-
-      if (this.params.showOverview) {
-        this.overviewRegion = this.util.withOrientation(this.drawer.wrapper.appendChild(document.createElement('overview')), this.wavesurfer.params.vertical);
-        this.util.style(this.overviewRegion, {
-          top: 0,
-          bottom: 0,
-          width: '0px',
-          display: 'block',
-          position: 'absolute',
-          cursor: 'move',
-          border: this.params.overviewBorderSize + 'px solid ' + this.params.overviewBorderColor,
-          zIndex: 2,
-          opacity: this.params.overviewOpacity
-        });
-      }
-    }
-  }, {
-    key: "bindWavesurferEvents",
-    value: function bindWavesurferEvents() {
-      window.addEventListener('resize', this._onResize, true);
-      window.addEventListener('orientationchange', this._onResize, true);
-      this.wavesurfer.on('audioprocess', this._onAudioprocess);
-      this.wavesurfer.on('seek', this._onSeek);
-
-      if (this.params.showOverview) {
-        this.wavesurfer.on('scroll', this._onScroll);
-        this.wavesurfer.drawer.wrapper.addEventListener('mouseover', this._onMouseover);
-      }
-    }
-  }, {
-    key: "bindMinimapEvents",
-    value: function bindMinimapEvents() {
-      var _this4 = this;
-
-      var positionMouseDown = {
-        clientX: 0,
-        clientY: 0
-      };
-      var relativePositionX = 0;
-      var seek = true; // the following event listeners will be destroyed by using
-      // this.unAll() and nullifying the DOM node references after
-      // removing them
-
-      if (this.params.interact) {
-        this.drawer.wrapper.addEventListener('click', function (event) {
-          _this4.fireEvent('click', event, _this4.drawer.handleEvent(event));
-        });
-        this.on('click', function (event, position) {
-          if (seek) {
-            _this4.drawer.progress(position);
-
-            _this4.wavesurfer.seekAndCenter(position);
-          } else {
-            seek = true;
-          }
-        });
-      }
-
-      if (this.params.showOverview) {
-        this.overviewRegion.domElement.addEventListener('mousedown', function (e) {
-          var event = _this4.util.withOrientation(e, _this4.wavesurfer.params.vertical);
-
-          _this4.draggingOverview = true;
-          relativePositionX = event.layerX;
-          positionMouseDown.clientX = event.clientX;
-          positionMouseDown.clientY = event.clientY;
-        });
-        this.drawer.wrapper.addEventListener('mousemove', function (e) {
-          if (_this4.draggingOverview) {
-            var event = _this4.util.withOrientation(e, _this4.wavesurfer.params.vertical);
-
-            _this4.moveOverviewRegion(event.clientX - _this4.drawer.container.getBoundingClientRect().left - relativePositionX);
-          }
-        });
-        this.drawer.wrapper.addEventListener('mouseup', function (e) {
-          var event = _this4.util.withOrientation(e, _this4.wavesurfer.params.vertical);
-
-          if (positionMouseDown.clientX - event.clientX === 0 && positionMouseDown.clientX - event.clientX === 0) {
-            seek = true;
-            _this4.draggingOverview = false;
-          } else if (_this4.draggingOverview) {
-            seek = false;
-            _this4.draggingOverview = false;
-          }
-        });
-      }
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var len = this.drawer.getWidth();
-      var peaks = this.wavesurfer.backend.getPeaks(len, 0, len);
-      this.drawer.drawPeaks(peaks, len, 0, len);
-      this.drawer.progress(this.wavesurfer.backend.getPlayedPercents());
-
-      if (this.params.showOverview) {
-        //get proportional width of overview region considering the respective
-        //width of the drawers
-        this.ratio = this.wavesurfer.drawer.width / this.drawer.width;
-        this.waveShowedWidth = this.wavesurfer.drawer.width / this.ratio;
-        this.waveWidth = this.wavesurfer.drawer.width;
-        this.overviewWidth = this.drawer.container.offsetWidth / this.ratio;
-        this.overviewPosition = 0;
-        this.moveOverviewRegion(this.wavesurfer.drawer.wrapper.scrollLeft / this.ratio);
-        this.util.style(this.overviewRegion, {
-          width: this.overviewWidth + 'px'
-        });
-      }
-    }
-  }, {
-    key: "moveOverviewRegion",
-    value: function moveOverviewRegion(pixels) {
-      if (pixels < 0) {
-        this.overviewPosition = 0;
-      } else if (pixels + this.overviewWidth < this.drawer.container.offsetWidth) {
-        this.overviewPosition = pixels;
-      } else {
-        this.overviewPosition = this.drawer.container.offsetWidth - this.overviewWidth;
-      }
-
+    if (this.params.showOverview) {
+      this.overviewRegion = this.util.withOrientation(this.drawer.wrapper.appendChild(document.createElement('overview')), this.wavesurfer.params.vertical);
       this.util.style(this.overviewRegion, {
-        left: this.overviewPosition + 'px'
+        top: 0,
+        bottom: 0,
+        width: '0px',
+        display: 'block',
+        position: 'absolute',
+        cursor: 'move',
+        border: this.params.overviewBorderSize + 'px solid ' + this.params.overviewBorderColor,
+        zIndex: 2,
+        opacity: this.params.overviewOpacity
       });
-
-      if (this.draggingOverview) {
-        this.wavesurfer.drawer.wrapper.scrollLeft = this.overviewPosition * this.ratio;
-      }
     }
-  }, {
-    key: "getWidth",
-    value: function getWidth() {
-      return this.drawer.width / this.params.pixelRatio;
+  }
+
+  bindWavesurferEvents() {
+    window.addEventListener('resize', this._onResize, true);
+    window.addEventListener('orientationchange', this._onResize, true);
+    this.wavesurfer.on('audioprocess', this._onAudioprocess);
+    this.wavesurfer.on('seek', this._onSeek);
+
+    if (this.params.showOverview) {
+      this.wavesurfer.on('scroll', this._onScroll);
+      this.wavesurfer.drawer.wrapper.addEventListener('mouseover', this._onMouseover);
     }
-  }], [{
-    key: "create",
-    value:
-    /**
-     * Minimap plugin definition factory
-     *
-     * This function must be used to create a plugin definition which can be
-     * used by wavesurfer to correctly instantiate the plugin.
-     *
-     * @param  {MinimapPluginParams} params parameters use to initialise the plugin
-     * @return {PluginDefinition} an object representing the plugin
-     */
-    function create(params) {
-      return {
-        name: 'minimap',
-        deferInit: params && params.deferInit ? params.deferInit : false,
-        params: params,
-        staticProps: {},
-        instance: MinimapPlugin
-      };
+  }
+
+  bindMinimapEvents() {
+    const positionMouseDown = {
+      clientX: 0,
+      clientY: 0
+    };
+    let relativePositionX = 0;
+    let seek = true; // the following event listeners will be destroyed by using
+    // this.unAll() and nullifying the DOM node references after
+    // removing them
+
+    if (this.params.interact) {
+      this.drawer.wrapper.addEventListener('click', event => {
+        this.fireEvent('click', event, this.drawer.handleEvent(event));
+      });
+      this.on('click', (event, position) => {
+        if (seek) {
+          this.drawer.progress(position);
+          this.wavesurfer.seekAndCenter(position);
+        } else {
+          seek = true;
+        }
+      });
     }
-  }]);
 
-  return MinimapPlugin;
-}();
+    if (this.params.showOverview) {
+      this.overviewRegion.domElement.addEventListener('mousedown', e => {
+        const event = this.util.withOrientation(e, this.wavesurfer.params.vertical);
+        this.draggingOverview = true;
+        relativePositionX = event.layerX;
+        positionMouseDown.clientX = event.clientX;
+        positionMouseDown.clientY = event.clientY;
+      });
+      this.drawer.wrapper.addEventListener('mousemove', e => {
+        if (this.draggingOverview) {
+          const event = this.util.withOrientation(e, this.wavesurfer.params.vertical);
+          this.moveOverviewRegion(event.clientX - this.drawer.container.getBoundingClientRect().left - relativePositionX);
+        }
+      });
+      this.drawer.wrapper.addEventListener('mouseup', e => {
+        const event = this.util.withOrientation(e, this.wavesurfer.params.vertical);
 
-exports["default"] = MinimapPlugin;
-module.exports = exports.default;
+        if (positionMouseDown.clientX - event.clientX === 0 && positionMouseDown.clientX - event.clientX === 0) {
+          seek = true;
+          this.draggingOverview = false;
+        } else if (this.draggingOverview) {
+          seek = false;
+          this.draggingOverview = false;
+        }
+      });
+    }
+  }
 
-/***/ })
+  render() {
+    const len = this.drawer.getWidth();
+    const peaks = this.wavesurfer.backend.getPeaks(len, 0, len);
+    this.drawer.drawPeaks(peaks, len, 0, len);
+    this.drawer.progress(this.wavesurfer.backend.getPlayedPercents());
 
-/******/ 	});
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __webpack_require__("./src/plugin/minimap/index.js");
-/******/ 	
+    if (this.params.showOverview) {
+      //get proportional width of overview region considering the respective
+      //width of the drawers
+      this.ratio = this.wavesurfer.drawer.width / this.drawer.width;
+      this.waveShowedWidth = this.wavesurfer.drawer.width / this.ratio;
+      this.waveWidth = this.wavesurfer.drawer.width;
+      this.overviewWidth = this.drawer.container.offsetWidth / this.ratio;
+      this.overviewPosition = 0;
+      this.moveOverviewRegion(this.wavesurfer.drawer.wrapper.scrollLeft / this.ratio);
+      this.util.style(this.overviewRegion, {
+        width: this.overviewWidth + 'px'
+      });
+    }
+  }
+
+  moveOverviewRegion(pixels) {
+    if (pixels < 0) {
+      this.overviewPosition = 0;
+    } else if (pixels + this.overviewWidth < this.drawer.container.offsetWidth) {
+      this.overviewPosition = pixels;
+    } else {
+      this.overviewPosition = this.drawer.container.offsetWidth - this.overviewWidth;
+    }
+
+    this.util.style(this.overviewRegion, {
+      left: this.overviewPosition + 'px'
+    });
+
+    if (this.draggingOverview) {
+      this.wavesurfer.drawer.wrapper.scrollLeft = this.overviewPosition * this.ratio;
+    }
+  }
+
+  getWidth() {
+    return this.drawer.width / this.params.pixelRatio;
+  }
+
+}
 /******/ 	return __webpack_exports__;
 /******/ })()
 ;
