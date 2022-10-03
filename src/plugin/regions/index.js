@@ -368,6 +368,9 @@ export default class RegionsPlugin {
             if (!drag) {
                 return;
             }
+            if (params.create == false) {
+                return;
+            }
             if (++pxMove <= slop) {
                 return;
             }
