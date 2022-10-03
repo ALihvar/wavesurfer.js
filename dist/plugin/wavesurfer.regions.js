@@ -1,5 +1,5 @@
 /*!
- * wavesurfer.js regions plugin 6.0.4 (2022-09-28)
+ * wavesurfer.js regions plugin 6.0.4 (2022-10-02)
  * https://wavesurfer-js.org
  * @license BSD-3-Clause
  */
@@ -1231,6 +1231,10 @@ class RegionsPlugin {
 
     const eventMove = event => {
       if (!drag) {
+        return;
+      }
+
+      if (params.create == false) {
         return;
       }
 
